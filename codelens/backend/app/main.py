@@ -12,7 +12,7 @@ from compiler.def_use import DefUseChain
 from compiler.explanation import ExplanationEngine
 
 from database import init_database
-from models import db
+from models import Analysis, db
 from auth import auth_bp
 
 
@@ -52,6 +52,36 @@ def health():
     return {
         "status": "healthy"
     }
+
+
+@app.route("/api/analyses", methods=["GET"])
+def get_analyses():
+    user_id = session.get("user_id")
+
+    if not user_id:
+        return {
+            "error": "Not authenticated."
+        }, 401
+
+    analyses = Analysis.query.filter_by(
+        user_id=user_id
+    ).order_by(
+        Analysis.updated_at.desc()
+    ).all()
+
+    return {
+        "analyses": [
+            {
+                "id": analysis.id,
+                "name": analysis.name,
+                "source_code": analysis.source_code,
+                "analysis_result": analysis.analysis_result,
+                "created_at": analysis.created_at,
+                "updated_at": analysis.updated_at,
+            }
+            for analysis in analyses
+        ]
+    }, 200
 
 
 @app.route("/api/analyze", methods=["POST"])
@@ -109,7 +139,7 @@ def analyze_code():
         explanation_engine = ExplanationEngine()
         explanation = explanation_engine.explain(ast)
 
-        return {
+        analysis_result = {
             "message": "Analysis completed successfully.",
             "explanation": explanation,
             "ast": ast_to_dict(ast),
@@ -131,6 +161,20 @@ def analyze_code():
                 def_use
             ),
         }
+
+        user_id = session.get("user_id")
+
+        if user_id:
+            analysis = Analysis(
+                user_id=user_id,
+                name=(data.get("name") or "Untitled analysis").strip(),
+                source_code=code,
+                analysis_result=analysis_result,
+            )
+            db.session.add(analysis)
+            db.session.commit()
+
+        return analysis_result
 
     except Exception as error:
         return {
