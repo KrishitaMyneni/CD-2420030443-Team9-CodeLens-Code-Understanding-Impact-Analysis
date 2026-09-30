@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, session
 from flask_cors import CORS
 
 from compiler.lexer import lexer
@@ -11,13 +11,33 @@ from compiler.data_flow import ReachingDefinitions
 from compiler.def_use import DefUseChain
 from compiler.explanation import ExplanationEngine
 
+from database import init_database
+from models import db
+from auth import auth_bp
+
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = "codelens-development-secret"
+
 
 CORS(
     app,
     origins=["http://localhost:5173"],
+    supports_credentials=True,
 )
+
+
+# Initialize database
+init_database(app)
+
+
+# Register authentication routes
+app.register_blueprint(auth_bp)
+
+
+# Create database tables
+with app.app_context():
+    db.create_all()
 
 
 @app.route("/")
@@ -46,10 +66,6 @@ def analyze_code():
     code = data["code"]
 
     try:
-        # -------------------------
-        # Parse source code
-        # -------------------------
-
         ast = parser.parse(
             code,
             lexer=lexer,
@@ -60,93 +76,38 @@ def analyze_code():
                 "error": "Unable to parse the provided code."
             }, 400
 
-        # -------------------------
-        # Symbol Table
-        # -------------------------
-
         symbol_builder = SymbolTableBuilder()
-
-        symbol_table = (
-            symbol_builder.build(ast)
-        )
-
-        # -------------------------
-        # TAC
-        # -------------------------
+        symbol_table = symbol_builder.build(ast)
 
         tac_generator = TACGenerator()
-
-        tac_instructions = (
-            tac_generator.generate(ast)
-        )
-
-        # -------------------------
-        # Basic Blocks
-        # -------------------------
+        tac_instructions = tac_generator.generate(ast)
 
         block_builder = BasicBlockBuilder()
-
-        basic_blocks = (
-            block_builder.build(
-                tac_instructions
-            )
+        basic_blocks = block_builder.build(
+            tac_instructions
         )
 
-        # -------------------------
-        # CFG
-        # -------------------------
-
         cfg_builder = CFGBuilder()
-
         cfg = cfg_builder.build(
             basic_blocks
         )
 
-        # -------------------------
-        # Reaching Definitions
-        # -------------------------
-
-        reaching_definitions = (
-            ReachingDefinitions(
-                basic_blocks,
-                cfg,
-            )
+        reaching_definitions = ReachingDefinitions(
+            basic_blocks,
+            cfg,
         )
 
-        data_flow = (
-            reaching_definitions.analyze()
-        )
-
-        # -------------------------
-        # Def-Use Chains
-        # -------------------------
+        data_flow = reaching_definitions.analyze()
 
         def_use_analyzer = DefUseChain(
             basic_blocks,
             reaching_definitions,
         )
 
-        def_use = (
-            def_use_analyzer.analyze()
-        )
+        def_use = def_use_analyzer.analyze()
 
-        # -------------------------
-        # Explanation
-        # -------------------------
-
-        explanation_engine = (
-            ExplanationEngine()
-        )
-
-        explanation = (
-            explanation_engine.explain(
-                ast
-            )
-        )
-
-        # -------------------------
-        # Response
-        # -------------------------
+        explanation_engine = ExplanationEngine()
+        explanation = explanation_engine.explain(ast)
 
         return {
             "message": "Analysis completed successfully.",
@@ -230,14 +191,12 @@ def ast_to_dict(node):
 def symbols_to_dict(symbol_table):
     result = []
 
-    for scope_data in (
-        symbol_table.all_scopes
-    ):
+    for scope_data in symbol_table.all_scopes:
         scope_name = scope_data["name"]
 
-        for symbol in (
-            scope_data["symbols"].values()
-        ):
+        for symbol in scope_data[
+            "symbols"
+        ].values():
             result.append(
                 {
                     "name": symbol.name,
@@ -260,8 +219,7 @@ def blocks_to_dict(blocks):
                 "id": block.id,
                 "instructions": [
                     str(instruction)
-                    for instruction
-                    in block.instructions
+                    for instruction in block.instructions
                 ],
             }
         )
@@ -272,9 +230,7 @@ def blocks_to_dict(blocks):
 def cfg_to_dict(cfg):
     nodes = []
 
-    for block_id, node in (
-        cfg.nodes.items()
-    ):
+    for block_id, node in cfg.nodes.items():
         nodes.append(
             {
                 "id": block_id,
@@ -292,8 +248,7 @@ def cfg_to_dict(cfg):
             "from": from_block,
             "to": to_block,
         }
-        for from_block, to_block
-        in cfg.get_edges()
+        for from_block, to_block in cfg.get_edges()
     ]
 
     return {
@@ -313,16 +268,14 @@ def data_flow_to_dict(data_flow):
     ):
         result[key] = {}
 
-        for block_id, definitions in (
-            data_flow[key].items()
-        ):
+        for block_id, definitions in data_flow[
+            key
+        ].items():
             result[key][str(block_id)] = [
                 {
                     "variable": definition.variable,
                     "block": definition.block_id,
-                    "instruction": (
-                        definition.instruction_index
-                    ),
+                    "instruction": definition.instruction_index,
                     "value": definition.value,
                 }
                 for definition in definitions
@@ -334,26 +287,20 @@ def data_flow_to_dict(data_flow):
 def def_use_to_dict(def_use):
     result = []
 
-    for definition, uses in (
-        def_use.items()
-    ):
+    for definition, uses in def_use.items():
         result.append(
             {
                 "definition": {
                     "variable": definition.variable,
                     "block": definition.block_id,
-                    "instruction": (
-                        definition.instruction_index
-                    ),
+                    "instruction": definition.instruction_index,
                     "value": definition.value,
                 },
                 "uses": [
                     {
                         "variable": use.variable,
                         "block": use.block_id,
-                        "instruction": (
-                            use.instruction_index
-                        ),
+                        "instruction": use.instruction_index,
                         "statement": use.instruction,
                     }
                     for use in sorted(
