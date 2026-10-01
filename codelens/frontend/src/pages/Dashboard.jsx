@@ -6,10 +6,11 @@ function Dashboard() {
   const navigate = useNavigate()
 
   const [user, setUser] = useState(null)
+  const [analyses, setAnalyses] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchDashboardData = async () => {
       try {
         const response = await fetch(
           'http://localhost:5000/api/auth/me',
@@ -25,7 +26,24 @@ function Dashboard() {
         }
 
         const data = await response.json()
+
         setUser(data.user)
+
+        const analysesResponse = await fetch(
+          'http://localhost:5000/api/analyses',
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        )
+
+        if (analysesResponse.ok) {
+          const analysesData = await analysesResponse.json()
+
+          setAnalyses(
+            analysesData.analyses || []
+          )
+        }
       } catch {
         navigate('/login', { replace: true })
       } finally {
@@ -33,7 +51,7 @@ function Dashboard() {
       }
     }
 
-    fetchUser()
+    fetchDashboardData()
   }, [navigate])
 
   const handleLogout = async () => {
@@ -114,7 +132,9 @@ function Dashboard() {
         <div className="dashboard-user-area">
           <div className="dashboard-user">
             <div className="dashboard-avatar">
-              {user?.name?.charAt(0)?.toUpperCase()}
+              {user?.name
+                ?.charAt(0)
+                ?.toUpperCase()}
             </div>
 
             <span>{user?.name}</span>
@@ -154,6 +174,7 @@ function Dashboard() {
             onClick={() => navigate('/analyze')}
           >
             <span>Analyse new code</span>
+
             <span className="dashboard-action-arrow">
               →
             </span>
@@ -166,7 +187,7 @@ function Dashboard() {
               TOTAL ANALYSES
             </span>
 
-            <strong>0</strong>
+            <strong>{analyses.length}</strong>
 
             <p>
               Programs analysed
@@ -301,27 +322,61 @@ function Dashboard() {
               </span>
             </div>
 
-            <div className="dashboard-empty-state">
-              <div className="dashboard-empty-icon">
-                +
+            {analyses.length === 0 ? (
+              <div className="dashboard-empty-state">
+                <div className="dashboard-empty-icon">
+                  +
+                </div>
+
+                <h3>
+                  No analyses yet
+                </h3>
+
+                <p>
+                  Your saved code analyses will
+                  appear here.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/analyze')}
+                >
+                  Analyse your first program →
+                </button>
               </div>
+            ) : (
+              <div className="dashboard-recent-list">
+                {analyses
+                  .slice(0, 4)
+                  .map((analysis) => (
+                    <div
+                      className="dashboard-recent-item"
+                      key={analysis.id}
+                    >
+                      <div>
+                        <strong>
+                          {analysis.name}
+                        </strong>
 
-              <h3>
-                No analyses yet
-              </h3>
+                        <span>
+                          {new Date(
+                            analysis.updated_at
+                          ).toLocaleString()}
+                        </span>
+                      </div>
 
-              <p>
-                Your saved code analyses will
-                appear here.
-              </p>
-
-              <button
-                type="button"
-                onClick={() => navigate('/analyze')}
-              >
-                Analyse your first program →
-              </button>
-            </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate('/history')
+                        }
+                      >
+                        View →
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            )}
           </section>
         </div>
 
