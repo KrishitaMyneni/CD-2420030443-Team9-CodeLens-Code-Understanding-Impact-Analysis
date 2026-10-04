@@ -908,100 +908,7 @@ function DefUseViewer({
   )
 }
 
-/* =========================================================
-   IMPACT
-========================================================= */
 
-function ImpactViewer() {
-  return (
-    <div className="result-view impact-view">
-      <ResultHeader
-        eyebrow="CHANGE IMPACT ANALYSIS"
-        title="Understand what a change affects"
-        badge="BEFORE / AFTER"
-      />
-
-      <div className="impact-intro">
-        <div className="impact-icon">
-          →
-        </div>
-
-        <div>
-          <h3>
-            Compare two versions of your program
-          </h3>
-
-          <p>
-            CodeLens will compare the before and
-            after representations to identify changed
-            syntax, affected control-flow regions,
-            dependent statements, and impacted paths.
-          </p>
-        </div>
-      </div>
-
-      <div className="impact-flow">
-        <div className="impact-step">
-          <span>
-            01
-          </span>
-
-          <strong>
-            BEFORE
-          </strong>
-
-          <small>
-            Original program
-          </small>
-        </div>
-
-        <i />
-
-        <div className="impact-step">
-          <span>
-            02
-          </span>
-
-          <strong>
-            CHANGE
-          </strong>
-
-          <small>
-            Compare representations
-          </small>
-        </div>
-
-        <i />
-
-        <div className="impact-step impact-step-active">
-          <span>
-            03
-          </span>
-
-          <strong>
-            IMPACT
-          </strong>
-
-          <small>
-            Affected code
-          </small>
-        </div>
-      </div>
-
-      <div className="impact-note">
-        <span>
-          NEXT
-        </span>
-
-        <p>
-          The before/after editor and impact
-          results will be connected to the existing
-          change-impact backend separately.
-        </p>
-      </div>
-    </div>
-  )
-}
 
 /* =========================================================
    GENERIC UI
@@ -1054,6 +961,198 @@ function EmptyState({
 }
 
 /* =========================================================
+   IMPACT VIEWER
+========================================================= */
+
+function ImpactViewer({
+  beforeCode,
+  afterCode,
+  setBeforeCode,
+  setAfterCode,
+  onImpactInputChange,
+  impactResult,
+  impactLoading,
+  impactError,
+  onAnalyzeImpact,
+}) {
+  return (
+    <div className="result-view impact-view">
+      <ResultHeader
+        eyebrow="CHANGE IMPACT ANALYSIS"
+        title="Understand code modifications"
+        badge={
+          impactResult
+            ? `${impactResult.impacts?.length || 0} IMPACTS`
+            : 'NEW'
+        }
+      />
+
+      <div className="impact-editors-container">
+        <div className="impact-editor-wrapper">
+          <div className="impact-editor-header">
+            <span>BEFORE CODE</span>
+            <div className="impact-badge-old">V1</div>
+          </div>
+          <textarea
+            className="impact-textarea"
+            value={beforeCode}
+            onChange={(e) => {
+              setBeforeCode(e.target.value)
+              onImpactInputChange()
+            }}
+            spellCheck="false"
+            aria-label="Before code"
+            placeholder="No previous source-code version yet. Run analysis after changing the source code."
+          />
+        </div>
+
+        <div className="impact-editor-wrapper">
+          <div className="impact-editor-header">
+            <span>AFTER CODE</span>
+            <div className="impact-badge-new">V2</div>
+          </div>
+          <textarea
+            className="impact-textarea"
+            value={afterCode}
+            onChange={(e) => {
+              setAfterCode(e.target.value)
+              onImpactInputChange()
+            }}
+            spellCheck="false"
+            aria-label="After code"
+          />
+        </div>
+      </div>
+
+      <div className="impact-actions">
+        <button
+          className="impact-run-button"
+          type="button"
+          onClick={onAnalyzeImpact}
+          disabled={impactLoading}
+        >
+          {impactLoading ? 'Analyzing Changes...' : 'Analyze Impact →'}
+        </button>
+      </div>
+
+      {impactError && (
+        <div className="analyze-error impact-error-banner">
+          {impactError}
+        </div>
+      )}
+
+      {impactResult && (
+        <div className="impact-results-container">
+
+          {impactResult.execution && (
+            <div className="impact-section impact-execution-card">
+              <div className="impact-section-header">
+                <h3>Execution Comparison</h3>
+                <DataPill>
+                  {impactResult.execution.changed
+                    ? 'Outputs Changed'
+                    : 'Outputs Match'}
+                </DataPill>
+              </div>
+              <div className="execution-outputs">
+                <div className="exec-output">
+                  <span>Before Result</span>
+                  <code>
+                    {formatValue(
+                      impactResult.execution.before?.error ||
+                        impactResult.execution.before?.return_value
+                    )}
+                  </code>
+                </div>
+                <div className="exec-output">
+                  <span>After Result</span>
+                  <code>
+                    {formatValue(
+                      impactResult.execution.after?.error ||
+                        impactResult.execution.after?.return_value
+                    )}
+                  </code>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="impact-results-scroll">
+            <div className="impact-grid">
+              <div className="impact-section">
+                <div className="impact-section-header">
+                  <h3>Detected Changes</h3>
+                  <small>{impactResult.changes?.length || 0} changes</small>
+                </div>
+                <div className="impact-list">
+                  {impactResult.changes?.length > 0 ? (
+                    impactResult.changes.map((change, idx) => (
+                      <div className="impact-item change-item" key={idx}>
+                        <span className="impact-path">{change.path}</span>
+                        <p>{change.description}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="impact-empty">No changes detected.</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="impact-section">
+                <div className="impact-section-header">
+                  <h3>Cascading Impacts</h3>
+                  <small>{impactResult.impacts?.length || 0} effects</small>
+                </div>
+                <div className="impact-list">
+                  {impactResult.impacts?.length > 0 ? (
+                    impactResult.impacts.map((impact, idx) => (
+                      <div className="impact-item effect-item" key={idx}>
+                        <div className="impact-item-top">
+                          <span className="impact-type">{impact.impact_type.replace('_', ' ')}</span>
+                          <span className="impact-path">{impact.path}</span>
+                        </div>
+                        <p>{impact.description}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="impact-empty">No impacts detected.</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {impactResult.boundary_cases && impactResult.boundary_cases.length > 0 && (
+            <div className="impact-section boundary-cases-section">
+              <div className="impact-section-header">
+                <h3>Generated Boundary Cases</h3>
+                <small>{impactResult.boundary_cases.length} cases to test</small>
+              </div>
+              <div className="boundary-list">
+                {impactResult.boundary_cases.map((bc, idx) => (
+                  <div className="boundary-card" key={idx}>
+                    <div className="boundary-top">
+                      <span className="boundary-type">{bc.boundary_type.replace('_', ' ')}</span>
+                      <div className="boundary-inputs">
+                        {Object.entries(bc.input).map(([key, val]) => (
+                          <DataPill key={key}>{key} = {formatValue(val)}</DataPill>
+                        ))}
+                      </div>
+                    </div>
+                    <p>{bc.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* =========================================================
    MAIN PAGE
 ========================================================= */
 
@@ -1087,6 +1186,29 @@ function Analyze() {
 
   const [result, setResult] =
     useState(null)
+
+  // Source edits are drafts. A source version is committed only after a
+  // successful normal analysis, never once per keystroke.
+  const [currentSourceCode, setCurrentSourceCode] =
+    useState(code)
+
+  const [, setPreviousSourceCode] =
+    useState(null)
+
+  // Impact inputs begin with the initial current version and no invented
+  // predecessor. They may be edited for an ad-hoc comparison without
+  // changing the source version history.
+  const [beforeCode, setBeforeCode] = useState('')
+  const [afterCode, setAfterCode] = useState(code)
+
+  const [impactResult, setImpactResult] =
+    useState(null)
+
+  const [impactLoading, setImpactLoading] =
+    useState(false)
+
+  const [impactError, setImpactError] =
+    useState('')
 
   const analysisTabs = [
     {
@@ -1176,6 +1298,7 @@ function Analyze() {
       }
 
       setResult(data)
+      commitSourceVersion()
       setActiveTab('explanation')
     } catch (err) {
       setError(
@@ -1187,7 +1310,88 @@ function Analyze() {
     }
   }
 
+  const commitSourceVersion = () => {
+    if (code === currentSourceCode) {
+      return
+    }
+
+    // Version N becomes BEFORE and the just-analyzed source becomes AFTER.
+    setPreviousSourceCode(currentSourceCode)
+    setCurrentSourceCode(code)
+    setBeforeCode(currentSourceCode)
+    setAfterCode(code)
+    setImpactError('')
+    setImpactResult(null)
+  }
+
+  const handleAnalyzeImpact = async () => {
+    if (!beforeCode.trim() || !afterCode.trim()) {
+      setImpactError(
+        'Please enter both the before and after programs.'
+      )
+      return
+    }
+
+    setImpactLoading(true)
+    setImpactError('')
+    setImpactResult(null)
+
+    try {
+      const response = await fetch(
+        'http://localhost:5000/api/impact',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            before_code: beforeCode,
+            after_code: afterCode,
+          }),
+        }
+      )
+
+      const data =
+        await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            'Change impact analysis failed.'
+        )
+      }
+
+      setImpactResult(data)
+    } catch (err) {
+      setImpactError(
+        err.message ||
+          'Something went wrong during change impact analysis.'
+      )
+    } finally {
+      setImpactLoading(false)
+    }
+  }
+
   const renderResult = () => {
+    // Impact analysis is independent of normal compiler analysis, so its
+    // inputs must remain available even before "Run analysis" is used.
+    if (activeTab === 'impact') {
+      return (
+        <ImpactViewer
+          beforeCode={beforeCode}
+          afterCode={afterCode}
+          setBeforeCode={setBeforeCode}
+          setAfterCode={setAfterCode}
+          onImpactInputChange={() => setImpactResult(null)}
+          impactResult={impactResult}
+          impactLoading={impactLoading}
+          impactError={impactError}
+          onAnalyzeImpact={handleAnalyzeImpact}
+        />
+      )
+    }
+
     if (!result) {
       return (
         <EmptyState
@@ -1207,14 +1411,6 @@ function Analyze() {
       cfg: 'cfg',
       'data-flow': 'data_flow',
       'def-use': 'def_use',
-    }
-
-    if (
-      activeTab === 'impact'
-    ) {
-      return (
-        <ImpactViewer />
-      )
     }
 
     const data =

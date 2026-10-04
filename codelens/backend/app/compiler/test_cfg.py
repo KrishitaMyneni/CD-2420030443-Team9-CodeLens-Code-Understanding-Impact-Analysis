@@ -1,8 +1,8 @@
-from lexer import lexer
-from parser import parser
-from tac import TACGenerator
-from basic_blocks import BasicBlockBuilder
-from cfg import CFGBuilder
+from backend.app.compiler.lexer import lexer
+from backend.app.compiler.parser import parser
+from backend.app.compiler.tac import TACGenerator
+from backend.app.compiler.basic_blocks import BasicBlockBuilder
+from backend.app.compiler.cfg import CFGBuilder
 
 
 code = """

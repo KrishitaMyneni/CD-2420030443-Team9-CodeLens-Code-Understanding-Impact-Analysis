@@ -10,6 +10,8 @@ from compiler.cfg import CFGBuilder
 from compiler.data_flow import ReachingDefinitions
 from compiler.def_use import DefUseChain
 from compiler.explanation import ExplanationEngine
+from compiler.change_analyzer import ChangeAnalyzer
+from compiler.impact_analyzer import ImpactAnalyzer
 
 from database import init_database
 from models import Analysis, db
@@ -27,15 +29,10 @@ CORS(
 )
 
 
-# Initialize database
 init_database(app)
 
-
-# Register authentication routes
 app.register_blueprint(auth_bp)
 
-
-# Create database tables
 with app.app_context():
     db.create_all()
 
@@ -167,14 +164,116 @@ def analyze_code():
         if user_id:
             analysis = Analysis(
                 user_id=user_id,
-                name=(data.get("name") or "Untitled analysis").strip(),
+                name=(
+                    data.get("name")
+                    or "Untitled analysis"
+                ).strip(),
                 source_code=code,
                 analysis_result=analysis_result,
             )
+
             db.session.add(analysis)
             db.session.commit()
 
         return analysis_result
+
+    except Exception as error:
+        return {
+            "error": str(error)
+        }, 500
+
+
+@app.route("/api/impact", methods=["POST"])
+def analyze_impact():
+    data = request.get_json(silent=True)
+
+    if not data:
+        return {
+            "error": "Request body is required."
+        }, 400
+
+    before_code = data.get("before_code")
+    after_code = data.get("after_code")
+
+    if (
+        not isinstance(before_code, str)
+        or not before_code.strip()
+        or not isinstance(after_code, str)
+        or not after_code.strip()
+    ):
+        return {
+            "error": "Both before_code and after_code are required."
+        }, 400
+
+    try:
+        old_ast = parser.parse(
+            before_code,
+            lexer=lexer,
+        )
+
+        new_ast = parser.parse(
+            after_code,
+            lexer=lexer,
+        )
+
+        if old_ast is None:
+            return {
+                "error": "Unable to parse the old code."
+            }, 400
+
+        if new_ast is None:
+            return {
+                "error": "Unable to parse the new code."
+            }, 400
+
+        change_analyzer = ChangeAnalyzer()
+
+        changes = change_analyzer.compare(
+            old_ast,
+            new_ast,
+        )
+
+        # Compile both submitted programs independently.  The comparison
+        # therefore cannot accidentally analyze one program twice.
+        before_representations = build_compiler_representations(old_ast)
+        after_representations = build_compiler_representations(new_ast)
+
+        impact_analyzer = ImpactAnalyzer()
+
+        impacts = impact_analyzer.analyze(
+            old_ast,
+            new_ast,
+            changes,
+            after_representations["cfg_object"],
+            after_representations["def_use_object"],
+            before_representations["cfg_object"],
+        )
+
+        return {
+            "message": "Change impact analysis completed successfully.",
+            "changes": [
+                {
+                    "type": change.change_type,
+                    "description": change.description,
+                    "path": change.path,
+                }
+                for change in changes
+            ],
+            "impacts": [
+                {
+                    "impact_type": impact.impact_type,
+                    "description": impact.description,
+                    "path": impact.path,
+                }
+                for impact in impacts
+            ],
+            "boundary_cases": impact_analyzer.boundary_cases,
+            "execution": impact_analyzer.execution,
+            "representations": {
+                "before": before_representations["serialized"],
+                "after": after_representations["serialized"],
+            },
+        }
 
     except Exception as error:
         return {
@@ -359,6 +458,31 @@ def def_use_to_dict(def_use):
         )
 
     return result
+
+
+def build_compiler_representations(ast):
+    """Build the compiler artifacts for one side of an impact comparison."""
+    symbol_table = SymbolTableBuilder().build(ast)
+    tac_instructions = TACGenerator().generate(ast)
+    basic_blocks = BasicBlockBuilder().build(tac_instructions)
+    cfg = CFGBuilder().build(basic_blocks)
+    reaching_definitions = ReachingDefinitions(basic_blocks, cfg)
+    data_flow = reaching_definitions.analyze()
+    def_use = DefUseChain(basic_blocks, reaching_definitions).analyze()
+
+    return {
+        "cfg_object": cfg,
+        "def_use_object": def_use,
+        "serialized": {
+            "ast": ast_to_dict(ast),
+            "symbols": symbols_to_dict(symbol_table),
+            "tac": [str(instruction) for instruction in tac_instructions],
+            "basic_blocks": blocks_to_dict(basic_blocks),
+            "cfg": cfg_to_dict(cfg),
+            "data_flow": data_flow_to_dict(data_flow),
+            "def_use": def_use_to_dict(def_use),
+        },
+    }
 
 
 if __name__ == "__main__":

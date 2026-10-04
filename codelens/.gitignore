@@ -11,6 +11,7 @@ env/
 # Python tooling
 .pytest_cache/
 .mypy_cache/
+parser.out
 
 # Node
 node_modules/
@@ -23,3 +24,4 @@ dist/
 # IDE
 .vscode/
 .idea/
+parsetab.py

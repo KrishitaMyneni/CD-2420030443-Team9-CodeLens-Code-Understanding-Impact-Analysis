@@ -1,6 +1,6 @@
-from lexer import lexer
-from parser import parser
-from tac import TACGenerator
+from backend.app.compiler.lexer import lexer
+from backend.app.compiler.parser import parser
+from backend.app.compiler.tac import TACGenerator
 
 
 code = """

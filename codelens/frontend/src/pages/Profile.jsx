@@ -50,7 +50,11 @@ function Profile() {
   }, [navigate])
 
   useEffect(() => {
-    loadProfile()
+    const timerId = window.setTimeout(() => {
+      void loadProfile()
+    }, 0)
+
+    return () => window.clearTimeout(timerId)
   }, [loadProfile])
 
   const handleLogout = async () => {

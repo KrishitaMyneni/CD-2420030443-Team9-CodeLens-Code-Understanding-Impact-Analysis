@@ -2147,3 +2147,465 @@
     gap: 7px;
   }
 }
+/* =========================================================
+   CHANGE IMPACT EDITORS
+========================================================= */
+
+.impact-editors {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.impact-editor {
+  overflow: hidden;
+  border: 1px solid #ded9d1;
+  border-radius: 9px;
+  background: #282624;
+}
+
+.impact-editor-header {
+  height: 40px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #3b3835;
+  background: #312f2c;
+  color: #aaa49d;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 1px;
+}
+
+.impact-editor:first-child .impact-editor-header {
+  color: #e96912;
+}
+
+.impact-editor:last-child .impact-editor-header {
+  color: #4caf82;
+}
+
+.impact-editor textarea {
+  width: 100%;
+  height: 300px;
+  padding: 16px;
+  box-sizing: border-box;
+  resize: vertical;
+  outline: none;
+  border: none;
+  background: #282624;
+  color: #eee9e2;
+  caret-color: #ef7923;
+  font-family:
+    "Cascadia Code",
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.impact-editor textarea:focus {
+  box-shadow: inset 0 0 0 1px #ef7923;
+}
+
+.impact-results {
+  margin-top: 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.impact-results-section {
+  padding: 16px;
+  border: 1px solid #e6e0d8;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.impact-results-section h3 {
+  margin: 0 0 12px;
+  color: #403c36;
+  font-size: 14px;
+}
+
+.impact-result-card {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-left: 3px solid #ef7923;
+  border-radius: 5px;
+  background: #faf8f5;
+}
+
+.impact-result-card strong {
+  color: #e96912;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.impact-result-card p {
+  margin: 5px 0;
+  color: #5f5951;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.impact-result-card small {
+  color: #a09a91;
+  font-size: 9px;
+  font-family: monospace;
+}
+
+@media (max-width: 800px) {
+  .impact-editors {
+    grid-template-columns: 1fr;
+  }
+  .impact-editors-container {
+    grid-template-columns: 1fr;
+  }
+  .impact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   RICH IMPACT VIEWER STYLES
+========================================================= */
+
+.impact-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.impact-editors-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.impact-editor-wrapper {
+  background: white;
+  border: 1px solid #e7e2d9;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.impact-editor-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+}
+
+.impact-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #faf8f5;
+  border-bottom: 1px solid #e7e2d9;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6a645b;
+  letter-spacing: 0.5px;
+}
+
+.impact-badge-old {
+  background: #e7e2d9;
+  color: #6a645b;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.impact-badge-new {
+  background: #ef7923;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.impact-textarea {
+  width: 100%;
+  min-height: 200px;
+  border: none;
+  padding: 16px;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #242321;
+  resize: vertical;
+  background: transparent;
+}
+
+.impact-textarea:focus {
+  outline: none;
+  background: #fffbfa;
+}
+
+.impact-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.impact-run-button {
+  background: #ef7923;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(239, 121, 35, 0.25);
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.impact-run-button:hover {
+  background: #df6914;
+  transform: translateY(-1px);
+}
+
+.impact-run-button:active {
+  transform: translateY(1px);
+}
+
+.impact-run-button:disabled {
+  background: #e7e2d9;
+  color: #a39f97;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.impact-results-container {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeUp 0.4s ease forwards;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.impact-section {
+  background: white;
+  border: 1px solid #e7e2d9;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.impact-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #f0eee9;
+  padding-bottom: 12px;
+}
+
+.impact-section-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #242321;
+}
+
+.impact-section-header small {
+  color: #858077;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.impact-grid {
+  display: grid;
+  grid-template-columns: minmax(400px, 1fr) minmax(400px, 1fr);
+  min-width: 820px;
+  gap: 20px;
+}
+
+.impact-results-scroll {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scrollbar-color: #d2cbc1 #f3efe9;
+  scrollbar-width: thin;
+}
+
+.impact-results-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.impact-results-scroll::-webkit-scrollbar-track {
+  background: #f3efe9;
+}
+
+.impact-results-scroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #d2cbc1;
+}
+
+.impact-grid > .impact-section {
+  min-width: 0;
+}
+
+.impact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.impact-grid > .impact-section:last-child .impact-list {
+  max-height: 330px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 5px;
+  scrollbar-color: #d2cbc1 transparent;
+  scrollbar-width: thin;
+}
+
+.impact-item {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: #faf8f5;
+  border-left: 3px solid transparent;
+}
+
+.change-item {
+  border-left-color: #3b82f6; /* blue for changes */
+}
+
+.effect-item {
+  border-left-color: #ef4444; /* red for effects */
+}
+
+.impact-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.impact-type {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #858077;
+  background: #e7e2d9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.impact-path {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: monospace;
+  font-size: 11px;
+  color: #ef7923;
+}
+
+.impact-item p {
+  margin: 0;
+  font-size: 13px;
+  color: #4b4843;
+  line-height: 1.5;
+}
+
+.impact-empty {
+  color: #a39f97;
+  font-size: 13px;
+  font-style: italic;
+  padding: 10px 0;
+}
+
+.execution-outputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.exec-output {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exec-output span {
+  font-size: 11px;
+  font-weight: 600;
+  color: #858077;
+  text-transform: uppercase;
+}
+
+.exec-output code {
+  background: #242321;
+  color: #a3d9a5;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: "Cascadia Code", monospace;
+  font-size: 13px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.boundary-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.boundary-card {
+  background: #fffcf8;
+  border: 1px solid #f2dec7;
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(239, 121, 35, 0.04);
+}
+
+.boundary-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.boundary-type {
+  font-size: 10px;
+  font-weight: 700;
+  color: #d06517;
+  text-transform: uppercase;
+}
+
+.boundary-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.boundary-card p {
+  margin: 0;
+  font-size: 12px;
+  color: #5f5951;
+  line-height: 1.5;
+}

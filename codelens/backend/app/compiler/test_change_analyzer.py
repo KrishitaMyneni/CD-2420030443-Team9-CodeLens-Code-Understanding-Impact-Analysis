@@ -1,6 +1,6 @@
-from lexer import lexer
-from parser import parser
-from change_analyzer import ChangeAnalyzer
+from backend.app.compiler.lexer import lexer
+from backend.app.compiler.parser import parser
+from backend.app.compiler.change_analyzer import ChangeAnalyzer
 
 
 old_code = """

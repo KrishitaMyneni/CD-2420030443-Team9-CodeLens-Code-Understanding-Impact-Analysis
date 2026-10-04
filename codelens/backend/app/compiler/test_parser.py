@@ -1,6 +1,5 @@
-from lexer import lexer
-from parser import parser
-
+from backend.app.compiler.lexer import lexer
+from backend.app.compiler.parser import parser
 
 code = """
 int calculate(int x) {

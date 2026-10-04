@@ -1,6 +1,6 @@
-from lexer import lexer
-from parser import parser
-from symbol_table_builder import SymbolTableBuilder
+from backend.app.compiler.lexer import lexer
+from backend.app.compiler.parser import parser
+from backend.app.compiler.symbol_table_builder import SymbolTableBuilder
 
 
 code = """

@@ -50,7 +50,11 @@ function History() {
   }, [])
 
   useEffect(() => {
-    loadAnalyses()
+    const timerId = window.setTimeout(() => {
+      void loadAnalyses()
+    }, 0)
+
+    return () => window.clearTimeout(timerId)
   }, [loadAnalyses])
 
   const handleLogout = async () => {

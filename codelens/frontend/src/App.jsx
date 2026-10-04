@@ -12,27 +12,6 @@ import Analyze from './pages/Analyze'
 import History from './pages/History'
 import Profile from './pages/Profile'
 
-function PlaceholderPage({ title }) {
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#f7f5f0',
-        color: '#292724',
-        fontFamily:
-          'Inter, system-ui, sans-serif',
-        fontSize: '24px',
-        fontWeight: 700,
-      }}
-    >
-      {title}
-    </div>
-  )
-}
-
 function App() {
   return (
     <BrowserRouter>

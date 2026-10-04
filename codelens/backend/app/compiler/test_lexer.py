@@ -1,4 +1,4 @@
-from lexer import lexer
+from backend.app.compiler.lexer import lexer
 
 
 code = """

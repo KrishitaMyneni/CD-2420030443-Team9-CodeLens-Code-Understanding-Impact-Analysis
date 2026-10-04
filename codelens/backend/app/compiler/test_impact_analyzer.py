@@ -1,13 +1,12 @@
-from lexer import lexer
-from parser import parser
-from change_analyzer import ChangeAnalyzer
-from impact_analyzer import ImpactAnalyzer
-from tac import TACGenerator
-from basic_blocks import BasicBlockBuilder
-from cfg import CFGBuilder
-from data_flow import ReachingDefinitions
-from def_use import DefUseChain
-
+from backend.app.compiler.lexer import lexer
+from backend.app.compiler.parser import parser
+from backend.app.compiler.change_analyzer import ChangeAnalyzer
+from backend.app.compiler.impact_analyzer import ImpactAnalyzer
+from backend.app.compiler.tac import TACGenerator
+from backend.app.compiler.basic_blocks import BasicBlockBuilder
+from backend.app.compiler.cfg import CFGBuilder
+from backend.app.compiler.data_flow import ReachingDefinitions
+from backend.app.compiler.def_use import DefUseChain
 
 old_code = """
 int calculate(int x) {
@@ -124,6 +123,7 @@ def_use_chains = def_use_analyzer.analyze()
 impact_analyzer = ImpactAnalyzer()
 
 impacts = impact_analyzer.analyze(
+    old_ast,
     new_ast,
     changes,
     new_cfg,
@@ -210,3 +210,33 @@ for impact in impacts:
     )
 
     print()
+def test_impact_analysis():
+    assert len(changes) > 0
+    assert any(
+        impact.impact_type == "condition"
+        for impact in impacts
+    )
+    assert any(
+        impact.impact_type == "control_flow"
+        for impact in impacts
+    )
+    assert any(
+        impact.impact_type == "boundary_condition"
+        for impact in impacts
+    )
+    assert any(
+        impact.impact_type == "basic_block"
+        for impact in impacts
+    )
+    assert any(
+        impact.impact_type == "affected_path"
+        for impact in impacts
+    )
+    assert any(
+        impact.impact_type == "return"
+        for impact in impacts
+    )
+    assert any(
+        impact.impact_type == "data_dependency"
+        for impact in impacts
+    )
