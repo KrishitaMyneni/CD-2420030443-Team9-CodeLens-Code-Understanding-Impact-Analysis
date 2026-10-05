@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../api'
 import './History.css'
 
-const API_URL = 'http://localhost:5000/api/analyses'
+const API_URL = `${API_BASE_URL}/analyses`
 
 function formatDate(value) {
   if (!value) return 'Date unavailable'
@@ -59,7 +60,7 @@ function History() {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:5000/api/auth/logout', {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       })

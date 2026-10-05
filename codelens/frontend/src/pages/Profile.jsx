@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../api'
 import './Profile.css'
 
-const USER_URL = 'http://localhost:5000/api/auth/me'
-const ANALYSES_URL = 'http://localhost:5000/api/analyses'
+const USER_URL = `${API_BASE_URL}/auth/me`
+const ANALYSES_URL = `${API_BASE_URL}/analyses`
 
 function Profile() {
   const navigate = useNavigate()
@@ -60,7 +61,7 @@ function Profile() {
   const handleLogout = async () => {
     setLoggingOut(true)
     try {
-      await fetch('http://localhost:5000/api/auth/logout', {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       })

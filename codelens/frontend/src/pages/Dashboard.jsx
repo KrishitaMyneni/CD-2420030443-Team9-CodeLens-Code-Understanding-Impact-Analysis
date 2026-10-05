@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../api'
 import './Dashboard.css'
 
 function Dashboard() {
@@ -13,7 +14,7 @@ function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         const response = await fetch(
-          'http://localhost:5000/api/auth/me',
+          `${API_BASE_URL}/auth/me`,
           {
             method: 'GET',
             credentials: 'include',
@@ -30,7 +31,7 @@ function Dashboard() {
         setUser(data.user)
 
         const analysesResponse = await fetch(
-          'http://localhost:5000/api/analyses',
+          `${API_BASE_URL}/analyses`,
           {
             method: 'GET',
             credentials: 'include',
@@ -57,7 +58,7 @@ function Dashboard() {
   const handleLogout = async () => {
     try {
       await fetch(
-        'http://localhost:5000/api/auth/logout',
+        `${API_BASE_URL}/auth/logout`,
         {
           method: 'POST',
           credentials: 'include',

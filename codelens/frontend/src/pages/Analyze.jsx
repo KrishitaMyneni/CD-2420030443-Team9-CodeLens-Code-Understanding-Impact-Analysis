@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../api'
 import './Analyze.css'
 
 /* =========================================================
@@ -1273,7 +1274,7 @@ function Analyze() {
 
     try {
       const response = await fetch(
-        'http://localhost:5000/api/analyze',
+        `${API_BASE_URL}/analyze`,
         {
           method: 'POST',
           headers: {
@@ -1338,7 +1339,7 @@ function Analyze() {
 
     try {
       const response = await fetch(
-        'http://localhost:5000/api/impact',
+        `${API_BASE_URL}/impact`,
         {
           method: 'POST',
           headers: {
