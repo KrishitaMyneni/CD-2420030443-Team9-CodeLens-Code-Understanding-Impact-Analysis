@@ -31,7 +31,7 @@ CORS(
     app,
     origins=[
         "http://localhost:5173",
-        "https://cd-2420030443-team9-code.vercel.app",
+        "https://cd-2420030443-team9-code-lens-code.vercel.app",
     ],
     supports_credentials=True,
 )
