@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, request, session
 from flask_cors import CORS
 
@@ -21,10 +23,16 @@ from auth import auth_bp
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "codelens-development-secret"
 
+is_production = os.getenv("RENDER", "").lower() == "true"
+app.config["SESSION_COOKIE_SECURE"] = is_production
+app.config["SESSION_COOKIE_SAMESITE"] = "None" if is_production else "Lax"
 
 CORS(
     app,
-    origins=["http://localhost:5173"],
+    origins=[
+        "http://localhost:5173",
+        "https://cd-2420030443-team9-code.vercel.app",
+    ],
     supports_credentials=True,
 )
 
